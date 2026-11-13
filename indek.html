@@ -1,0 +1,723 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Kuis Wali Songo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap">
+<style>
+/* Layout: satu kolom sempit (maks 760px). Header dengan tab guru, kartu soal di tengah, navigasi nomor soal di bawahnya. */
+:root{
+  --bg:#F3F7F6; --surface:#FFFFFF; --ink:#13231F; --muted:#586A65; --line:#D5E0DC;
+  --accent:#0B6E64; --accent-ink:#FFFFFF; --accent-soft:#DCEFEB;
+  --good:#1B7F4B; --good-soft:#DDF3E6; --bad:#B3362B; --bad-soft:#FBE4E1;
+  --font-display:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-body:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1715; --surface:#16231F; --ink:#E6F0ED; --muted:#9FB3AD; --line:#2A3D38;
+    --accent:#4FC2B2; --accent-ink:#06201C; --accent-soft:#1B3A35;
+    --good:#5CCB8A; --good-soft:#18362A; --bad:#F0837A; --bad-soft:#3E1F1C;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1715; --surface:#16231F; --ink:#E6F0ED; --muted:#9FB3AD; --line:#2A3D38;
+  --accent:#4FC2B2; --accent-ink:#06201C; --accent-soft:#1B3A35;
+  --good:#5CCB8A; --good-soft:#18362A; --bad:#F0837A; --bad-soft:#3E1F1C;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--font-body)}
+.wrap{max-width:760px;margin:0 auto;padding-block:20px 56px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--font-display);text-wrap:balance;margin:0}
+p{margin:0}
+[hidden]{display:none!important}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.brand{font:700 15px/1.2 var(--font-display)}
+.brand small{display:block;margin-top:2px;font:500 12px var(--font-body);color:var(--muted);letter-spacing:.05em;text-transform:uppercase}
+.tabs{display:flex;gap:4px;padding:3px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.tabs button{font:600 13px var(--font-body);padding:7px 12px;border:0;border-radius:7px;background:transparent;color:var(--muted);cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px}
+.stack{display:grid;gap:16px}
+.eyebrow{font:600 12px var(--font-body);letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.note{font-size:14px;color:var(--muted)}
+.note[data-s="saved"]{color:var(--good)}
+.note[data-s="error"]{color:var(--bad)}
+
+.btn{font:600 15px var(--font-body);padding:11px 18px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.btn.primary:hover{filter:brightness(1.06)}
+.btn.small{font-size:13px;padding:6px 10px}
+.btn.danger{color:var(--bad)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:focus-visible,.cell:focus-visible,.tabs button:focus-visible,input[type="text"]:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.row.between{justify-content:space-between}
+
+/* Mulai */
+.lede{font-size:17px;color:var(--muted);max-width:56ch}
+.hero h1{font-size:clamp(28px,6vw,38px);line-height:1.12;font-weight:800;letter-spacing:-.01em}
+.field{display:grid;gap:6px}
+.field label{font:600 14px var(--font-body)}
+.field input{font:400 16px var(--font-body);padding:11px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);width:100%}
+.err{font-size:13px;color:var(--bad)}
+.fields{display:grid;grid-template-columns:2fr 1fr;gap:12px}
+@media (max-width:520px){.fields{grid-template-columns:1fr}}
+.topics{display:grid;gap:0;margin:0;padding:0;list-style:none}
+.topics li{display:flex;gap:14px;padding:9px 0;border-top:1px solid var(--line);font-size:15px}
+.topics li:first-child{border-top:0}
+.topics .rng{flex:none;width:76px;color:var(--muted);font-variant-numeric:tabular-nums;font-weight:500}
+
+/* Kuis */
+.meta{display:flex;justify-content:space-between;gap:12px;font:500 13px var(--font-body);color:var(--muted);margin-bottom:8px;font-variant-numeric:tabular-nums}
+.track{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:18px}
+.fill{height:100%;width:0;background:var(--accent);transition:width .2s}
+@media (prefers-reduced-motion:reduce){.fill{transition:none}}
+.stem{font:600 20px/1.4 var(--font-display);margin-top:6px;white-space:pre-line;text-wrap:pretty}
+.opts{display:grid;gap:10px;margin-top:18px}
+.opt{position:relative;display:flex;gap:12px;align-items:flex-start;padding:13px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);cursor:pointer}
+.opt:hover{border-color:var(--accent)}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.opt:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.key{flex:none;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font:700 13px var(--font-display);background:var(--bg);color:var(--muted)}
+.opt:has(input:checked) .key{background:var(--accent);color:var(--accent-ink)}
+.txt{min-width:0;overflow-wrap:anywhere;padding-top:3px}
+.pager{display:flex;justify-content:space-between;gap:10px;margin-top:20px}
+.confirm{margin-top:18px;padding:16px;border-radius:12px;background:var(--accent-soft);display:grid;gap:12px}
+details.navbox{margin-top:16px}
+details.navbox summary{cursor:pointer;font:600 14px var(--font-body);padding:4px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:6px;margin-top:12px}
+.cell{height:36px;border-radius:8px;border:1px solid var(--line);background:var(--surface);font:600 13px var(--font-body);font-variant-numeric:tabular-nums;color:var(--muted);cursor:pointer}
+.cell.done{background:var(--accent-soft);border-color:transparent;color:var(--ink)}
+.cell.cur{outline:2px solid var(--accent);outline-offset:1px;color:var(--ink)}
+
+/* Hasil */
+.scoreline{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.big{font:800 64px/1 var(--font-display);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.of{font:600 22px var(--font-display);color:var(--muted)}
+.nilai{margin-left:auto;text-align:right}
+.nilai b{display:block;font:800 30px/1 var(--font-display);font-variant-numeric:tabular-nums}
+.nilai span{font-size:12px;color:var(--muted);letter-spacing:.05em;text-transform:uppercase}
+.tbars{display:grid;gap:12px;margin-top:6px}
+.tb .lbl{display:flex;justify-content:space-between;gap:12px;font-size:14px;margin-bottom:4px}
+.tb .lbl span:last-child{font-variant-numeric:tabular-nums;color:var(--muted);flex:none}
+.tb .track{margin:0}
+.rv{border-top:1px solid var(--line);padding:16px 0;display:grid;gap:6px}
+.rv:first-child{border-top:0}
+.rv-head{display:flex;gap:10px;align-items:center}
+.rv-q{font-weight:600;white-space:pre-line;text-wrap:pretty}
+.rv-a{font-size:15px}
+.chip{font:600 12px var(--font-body);padding:3px 9px;border-radius:99px}
+.chip.ok{background:var(--good-soft);color:var(--good)}
+.chip.no{background:var(--bad-soft);color:var(--bad)}
+
+/* Guru */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px}
+.stat{padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.stat b{display:block;font:800 26px/1.1 var(--font-display);font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:14px}
+th,td{text-align:left;padding:9px 10px;border-top:1px solid var(--line);vertical-align:middle}
+th{font:600 12px var(--font-body);color:var(--muted);letter-spacing:.04em;text-transform:uppercase;border-top:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.hard{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.hard li{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:baseline}
+.hard .pct{font:700 15px var(--font-display);font-variant-numeric:tabular-nums;color:var(--bad)}
+.hard .sn{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:14px;color:var(--muted)}
+textarea.tsv{width:100%;min-height:110px;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">Kuis Wali Songo<small>Pendidikan Agama Islam</small></div>
+    <div class="tabs" id="tabs" role="tablist" hidden>
+      <button type="button" role="tab" id="tab-kuis" aria-selected="true">Kuis</button>
+      <button type="button" role="tab" id="tab-hasil" aria-selected="false">Hasil peserta</button>
+    </div>
+  </header>
+
+  <!-- Mulai -->
+  <section id="view-start" class="stack">
+    <div class="card hero stack">
+      <div class="stack" style="gap:10px">
+        <span class="eyebrow">50 soal pilihan ganda</span>
+        <h1>Dakwah damai para wali di tanah Jawa</h1>
+        <p class="lede">Jawab satu per satu. Jawaban boleh diubah sampai kamu menekan Kirim. Setelah selesai, kamu bisa melihat pembahasan tiap soal.</p>
+      </div>
+      <form id="form-start" class="stack" novalidate>
+        <div class="fields">
+          <div class="field">
+            <label for="nama">Nama lengkap</label>
+            <input type="text" id="nama" name="nama" autocomplete="name" maxlength="60">
+            <span class="err" id="nama-err" hidden>Isi namamu dulu supaya nilainya bisa dikenali.</span>
+          </div>
+          <div class="field">
+            <label for="kelas">Kelas (boleh kosong)</label>
+            <input type="text" id="kelas" name="kelas" maxlength="20" placeholder="mis. 8B">
+          </div>
+        </div>
+        <div class="row">
+          <button class="btn primary" type="submit" id="btn-start">Mulai kuis</button>
+        </div>
+        <p class="note">Nilaimu otomatis tercatat untuk guru kalau halaman ini dibuka dari akun Claude dengan akses Kontributor. Kalau tidak, skor tetap tampil di layarmu.</p>
+      </form>
+    </div>
+    <div class="card">
+      <h2 style="font-size:16px;margin-bottom:8px">Materi yang diujikan</h2>
+      <ul class="topics" id="topics"></ul>
+    </div>
+  </section>
+
+  <!-- Kuis -->
+  <section id="view-quiz" hidden>
+    <div class="card">
+      <div class="meta"><span id="qnum"></span><span id="answered"></span></div>
+      <div class="track"><div class="fill" id="bar"></div></div>
+      <div class="eyebrow" id="topic"></div>
+      <h2 class="stem" id="stem"></h2>
+      <div class="opts" id="opts" role="radiogroup" aria-label="Pilihan jawaban"></div>
+      <div class="pager">
+        <button type="button" class="btn" id="prev">Sebelumnya</button>
+        <button type="button" class="btn primary" id="next">Lanjut</button>
+      </div>
+      <div class="confirm" id="confirm" hidden>
+        <p id="confirm-text"></p>
+        <div class="row">
+          <button type="button" class="btn primary" id="send">Kirim jawaban</button>
+          <button type="button" class="btn" id="recheck">Periksa lagi</button>
+        </div>
+      </div>
+      <details class="navbox">
+        <summary>Daftar soal</summary>
+        <div class="grid" id="grid"></div>
+      </details>
+    </div>
+  </section>
+
+  <!-- Hasil -->
+  <section id="view-result" class="stack" hidden>
+    <div class="card stack">
+      <div class="eyebrow" id="r-who"></div>
+      <div class="scoreline">
+        <span class="big" id="r-score"></span><span class="of" id="r-of"></span>
+        <div class="nilai"><b id="r-nilai"></b><span>nilai (0–100)</span></div>
+      </div>
+      <p class="note" id="save-status" aria-live="polite"></p>
+      <div class="row">
+        <button type="button" class="btn primary" id="retake">Ulangi kuis</button>
+        <button type="button" class="btn" id="other">Ganti peserta</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2 style="font-size:16px;margin-bottom:12px">Skor per materi</h2>
+      <div class="tbars" id="tbars"></div>
+    </div>
+    <div class="card">
+      <div class="row between" style="margin-bottom:6px">
+        <h2 style="font-size:16px" id="rv-title">Pembahasan</h2>
+        <button type="button" class="btn small" id="rv-toggle"></button>
+      </div>
+      <div id="review"></div>
+    </div>
+  </section>
+
+  <!-- Guru -->
+  <section id="view-teacher" class="stack" hidden>
+    <div class="card stack">
+      <div class="row between">
+        <h2 style="font-size:18px">Hasil peserta</h2>
+        <div class="row">
+          <span class="note" id="copy-note" aria-live="polite"></span>
+          <button type="button" class="btn small" id="copy" hidden>Salin tabel</button>
+        </div>
+      </div>
+      <div id="teacher-body" class="stack"></div>
+      <textarea class="tsv" id="tsv" readonly hidden aria-label="Tabel hasil, siap disalin"></textarea>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* Soal: [pertanyaan, [A,B,C,D], indeks jawaban benar, pembahasan] */
+var QUESTIONS = [
+["Siapakah yang dimaksud dengan Wali Songo?",["Sembilan wali penyebar agama Islam di Jawa","Raja-raja yang memeluk agama Islam di Nusantara","Ulama besar yang hidup pada masa kolonial","Tokoh pewaris tahta kerajaan-kerajaan Islam di Jawa"],0,"Wali Songo adalah sembilan wali yang menyebarkan Islam di tanah Jawa."],
+["Apa tujuan utama Wali Songo datang ke Nusantara?",["Menaklukkan kerajaan-kerajaan Hindu dan Buddha","Mencari kekayaan dan kekuasaan","Menyebarkan agama Islam dengan cara damai","Membangun kerajaan Islam yang kuat"],2,"Wali Songo datang untuk menyebarkan Islam dengan cara damai, bukan untuk menaklukkan."],
+["Cara apa yang digunakan Wali Songo untuk menyebarkan Islam?",["Paksaan dan kekerasan","Isolasi sosial terhadap penganut agama lain","Dakwah secara damai dan akulturasi budaya","Perang dan penaklukan"],2,"Dakwah Wali Songo dilakukan secara damai dan memadukan ajaran Islam dengan budaya setempat (akulturasi)."],
+["Seni dan budaya apa yang dipengaruhi oleh dakwah Wali Songo?",["Musik rock dan pop","Gamelan, wayang, dan seni ukir","Lukisan realis dan abstrak","Sastra klasik Eropa"],1,"Wali Songo memakai gamelan, wayang, dan seni ukir sebagai sarana dakwah."],
+["Mengapa dakwah Wali Songo berhasil diterima dengan baik oleh masyarakat Nusantara?",["Karena didukung oleh kekuatan militer yang besar","Karena menggunakan bahasa asing yang sulit dimengerti","Karena disesuaikan dengan budaya dan kebiasaan masyarakat setempat","Karena mengancam dan mengintimidasi masyarakat yang menolak"],2,"Dakwah diterima karena disesuaikan dengan budaya dan kebiasaan masyarakat setempat."],
+["Siapakah nama asli dari Sunan Bonang?",["Raden Maulana Makhdum Ibrahim","Raden Rahmat","Raden Hasan","Raden Jati"],0,"Nama asli Sunan Bonang adalah Raden Maulana Makhdum Ibrahim. Raden Rahmat adalah nama kecil Sunan Ampel."],
+["Di mana Sunan Bonang banyak melakukan penyebaran dakwahnya?",["Jawa Timur","Jawa Tengah","Jawa Barat","Bali"],0,"Sunan Bonang berdakwah terutama di Jawa Timur, dengan Tuban sebagai pusatnya."],
+["Sunan Bonang adalah putra dari Sunan Ampel dan ibunya yang bernama ....",["Syarifah Mudaim","Nyi Ageng Manila","Nyai Ageng Ngepeh","Syarifah Alawiyah"],1,"Ibunda Sunan Bonang adalah Nyai Ageng Manila, istri Sunan Ampel."],
+["Sunan Bonang dikenal sebagai penyebar Islam yang juga menggunakan media seni. Apa jenis seni yang sering ia gunakan dalam dakwahnya?",["Musik","Tari","Drama","Lukisan"],0,"Sunan Bonang banyak memakai musik, terutama gamelan dan tembang, dalam dakwahnya."],
+["Apa nama salah satu karya musik yang dikaitkan dengan Sunan Bonang dan sering digunakan dalam ritual keagamaan?",["Gambang Kromo","Gamelan","Keroncong","Wayang kulit"],1,"Sunan Bonang dikaitkan dengan gamelan, yang ia lengkapi dengan instrumen bonang."],
+["Sunan Bonang dipercaya sebagai salah satu penyebar agama Islam di daerah mana?",["Surabaya","Tuban","Malang","Yogyakarta"],1,"Sunan Bonang berdakwah di Tuban dan dimakamkan di sana."],
+["Dalam proses dakwahnya, Sunan Bonang banyak mengajarkan prinsip-prinsip Islam melalui ....",["Ceramah","Khotbah","Puisi","Kesenian"],3,"Sunan Bonang menyampaikan ajaran Islam melalui kesenian."],
+["Wali Songo yang menjadi kreator gamelan seperti sekarang, dengan menambahkan instrumen bonang, dan gubahannya bernuansa dzikir adalah ....",["Sunan Kalijaga","Sunan Drajat","Sunan Muria","Sunan Bonang"],3,"Sunan Bonang menambahkan instrumen bonang pada gamelan dengan nuansa dzikir."],
+["Sunan Bonang berdakwah dengan sikap bijaksana, rendah hati, dan tidak memaksa, sehingga agama Islam dapat diterima tanpa ....",["Kekerasan","Toleransi","Damai","Pilihan"],0,"Dakwahnya yang bijaksana dan tidak memaksa membuat Islam diterima tanpa kekerasan."],
+["Nama asli Sunan Gresik adalah ....",["Raden Paku","Maulana Malik Ibrahim","Sunan Ampel","Syekh Jumadil Kubro"],1,"Nama asli Sunan Gresik adalah Maulana Malik Ibrahim. Raden Paku adalah nama asli Sunan Giri."],
+["Sunan Gresik dikenal sebagai Wali Songo yang pertama kali datang ke tanah Jawa pada abad ....",["Ke-12","Ke-13","Ke-14","Ke-15"],2,"Maulana Malik Ibrahim datang ke Jawa pada akhir abad ke-14."],
+["Sunan Gresik dikenal dengan julukan lain, yaitu ....",["Syekh Maghribi","Syekh Maulana","Syekh Waliullah","Syekh Awliya"],0,"Maulana Malik Ibrahim juga dijuluki Syekh Maghribi."],
+["Sunan Gresik datang ke Jawa pada masa pemerintahan raja ....",["Prabu Brawijaya","Prabu Airlangga","Prabu Jayabaya","Prabu Kertanegara"],0,"Sunan Gresik datang pada masa Majapahit, di bawah Prabu Brawijaya."],
+["Anak dari Sunan Gresik yang juga menjadi Wali Songo bernama ....",["Sunan Kalijaga","Sunan Ampel","Sunan Giri","Sunan Kudus"],2,"Menurut kunci yang umum dipakai, Sunan Giri disebut sebagai keturunan Sunan Gresik. Sebagian riwayat menyebutnya kerabat atau keponakan."],
+["Sunan Gresik disebut sebagai bapak Wali Songo karena ....",["Beliau adalah Wali Songo yang bijaksana","Beliau menjadi pemimpin para wali","Beliau adalah orang pertama yang menyebarkan Islam di Jawa","Beliau menulis kitab-kitab agama"],2,"Sunan Gresik dijuluki bapak Wali Songo karena ia yang pertama merintis dakwah Islam di antara para wali."],
+["Sunan Gresik dikenal sebagai salah satu Wali Songo yang menyebarkan Islam di ....",["Jawa Timur","Jawa Tengah","Sumatra","Kalimantan"],0,"Sunan Gresik berdakwah di Jawa Timur, dengan pusat di Gresik."],
+["Makam Sunan Gresik terletak di ....",["Surabaya","Demak","Gresik","Kudus"],2,"Makam Sunan Gresik berada di Gresik, Jawa Timur."],
+["Sunan Gresik berperan penting dalam penyebaran Islam di kerajaan ....",["Majapahit","Mataram","Kediri","Demak"],0,"Sunan Gresik berdakwah di wilayah kekuasaan Majapahit."],
+["Sunan Ampel pada masa kecilnya bernama ....",["Raden Patah","Raden Mas Said","Raden Rahmat","Raden Ampel"],2,"Nama kecil Sunan Ampel adalah Raden Rahmat."],
+["Ayah Sunan Ampel bernama ....",["Sunan Giri","Sunan Drajat","Maulana Malik Ibrahim","Tumenggung Wilatikta"],2,"Ayah Sunan Ampel adalah Maulana Malik Ibrahim. Tumenggung Wilatikta adalah ayah Sunan Kalijaga."],
+["Salah satu ajaran Sunan Ampel adalah Moh Madon, artinya ....",["Tidak berjudi","Tidak berzina","Tidak minum","Tidak mencuri"],1,"Moh madon berarti tidak berzina, salah satu dari ajaran Moh Limo."],
+["Orang yang pertama kali menciptakan huruf pegon adalah ....",["Sunan Giri","Sunan Ampel","Sunan Gresik","Sunan Bonang"],1,"Huruf pegon, yaitu tulisan Arab untuk bahasa Jawa, dikaitkan dengan Sunan Ampel."],
+["Sayyid Ali Rahmatullah adalah nama asli dari Sunan ....",["Gresik","Bonang","Ampel","Giri"],2,"Sayyid Ali Rahmatullah adalah nama asli Sunan Ampel."],
+["Ajaran yang sangat terkenal yang diajarkan oleh Sunan Ampel pada saat itu adalah ....",["Falsafah Moh Limo","Falsafah Aqidah","Falsafah Pancasila","Falsafah Islam"],0,"Falsafah Moh Limo adalah ajaran Sunan Ampel yang paling terkenal."],
+["Ayah Sunan Ampel adalah seorang ulama besar dari Samarkand yang bermazhab ....",["Maliki","Hambali","Hanafi","Syafi'i"],2,"Ayah Sunan Ampel, ulama besar dari Samarkand, dikenal bermazhab Hanafi."],
+["Sunan Ampel menyebarkan agama Islam di kalangan masyarakat pedesaan di daerah ....",["Demak","Madura","Muria","Ampel"],1,"Sunan Ampel mengajarkan Islam kepada masyarakat pedesaan, termasuk di Madura."],
+["Nama upacara untuk mengenang kematian seseorang sebelum datangnya Islam adalah ....",["Kenduri","Yasinan","Tahlilan","Zikiran"],0,"Kenduri adalah upacara mengenang kematian yang sudah ada sebelum Islam, lalu diisi dengan doa dan dzikir."],
+["Sunan Drajat adalah putra dari ....",["Sunan Bonang","Sunan Kalijaga","Sunan Ampel","Sunan Giri"],2,"Sunan Drajat adalah putra Sunan Ampel."],
+["Nama kecil Sunan Drajat adalah ....",["Raden Said","Raden Qasim","Makdum Ibrahim","Syarif Hidayatullah"],1,"Nama kecil Sunan Drajat adalah Raden Qasim."],
+["Salah satu strategi Sunan Drajat untuk berdakwah adalah dengan menggunakan pendekatan ....",["Kesenian","Ekonomi","Materi","Kebudayaan"],1,"Sunan Drajat dikenal peduli pada kehidupan ekonomi dan sosial rakyat kecil."],
+["Sunan Drajat merupakan wali yang terkenal akan ....",["Ketegasannya","Ketampanannya","Keangkuhannya","Kecerdasannya"],3,"Sunan Drajat dikenal karena kecerdasannya."],
+["Penyampaian dakwah dilakukan Sunan Drajat secara ....",["Memaksa","Menyenangkan","Keras","Selektif"],1,"Sunan Drajat berdakwah dengan cara yang menyenangkan."],
+["Dalam strategi dakwahnya, Sunan Drajat menciptakan tembang sebagai salah satu medianya. Tembang yang dimaksud adalah ....",["Sinom","Kinanti","Pangkur","Durma"],2,"Sunan Drajat menciptakan tembang Pangkur sebagai media dakwah."],
+["Sunan Drajat dimakamkan di kota ....",["Surabaya","Tuban","Gresik","Lamongan"],3,"Sunan Drajat dimakamkan di Paciran, Lamongan."],
+["Salah satu usaha yang dilakukan Sunan Drajat dalam berdakwah adalah ....",["Mendatangi rumah-rumah penduduk untuk mengajarkan Al-Qur'an dan as-Sunnah","Membuka usaha dagang","Membangun saluran irigasi","Memberikan pengobatan gratis"],0,"Sunan Drajat mendatangi rumah-rumah penduduk untuk mengajarkan Al-Qur'an dan Sunnah."],
+["Sunan Drajat memiliki pesantren di ....",["Jember","Pacitan","Surabaya","Lamongan"],3,"Sunan Drajat mendirikan pesantren di Lamongan."],
+["Perhatikan hal-hal berikut.\n1) Padhang Wulan\n2) Sungkeman\n3) Suluk Wijil\n4) Lir-ilir\n\nBerdasarkan hal-hal tersebut, yang termasuk tembang Sunan Giri ditunjukkan oleh nomor ....",["1) dan 2)","1) dan 4)","2) dan 3)","2) dan 4)"],1,"Padhang Wulan dan Lir-ilir dikaitkan dengan Sunan Giri. Suluk Wijil adalah karya Sunan Bonang."],
+["Sunan Giri adalah salah satu Wali Songo yang dikenal karena ....",["Kemampuannya menyebarkan Islam melalui jalur perdagangan","Kecerdasannya dalam merancang strategi dakwah","Kebijaksanaannya dalam berdakwah","Kekuatan mistiknya"],1,"Sunan Giri dikenal cerdas merancang strategi dakwah, misalnya lewat permainan anak."],
+["Sunan Giri memiliki nama asli ....",["Raden Mas Said","Raden Rahmat","Raden Fatah","Raden Paku"],3,"Nama asli Sunan Giri adalah Raden Paku."],
+["Dalam berdakwah, Sunan Giri tidak hanya menyebarkan ajaran Islam, tetapi juga memperhatikan kondisi sosial masyarakat. Salah satu caranya adalah ....",["Memberikan pendidikan gratis bagi semua kalangan di Giri Kedaton","Menjadi penasihat politik bagi kerajaan Majapahit","Menyusun undang-undang kerajaan Islam Samudra Pasai","Menulis kitab-kitab fiqh berbahasa Jawa"],0,"Giri Kedaton memberi pendidikan gratis bagi semua kalangan."],
+["Pusat kekuasaan dan pendidikan yang didirikan oleh Sunan Giri berkembang menjadi kerajaan kecil yang dikenal dengan nama ....",["Kerajaan Giri Kedaton","Kerajaan Majapahit","Kesultanan Demak","Kerajaan Pajang"],0,"Pusat kekuasaan dan pendidikan Sunan Giri berkembang menjadi Giri Kedaton."],
+["Salah satu keistimewaan Sunan Giri dalam menyebarkan Islam adalah kemampuannya menyesuaikan dakwahnya dengan kondisi sosial-budaya masyarakat. Pendekatan ini dikenal dengan istilah ....",["Sinkretisme","Asimilasi budaya","Islamisasi budaya lokal","Reformasi agama"],1,"Menyesuaikan dakwah dengan kondisi sosial-budaya setempat dikenal sebagai asimilasi budaya."],
+["Sunan Giri mendirikan sebuah pesantren yang kemudian menjadi pusat pengajaran Islam yang penting di Jawa. Pesantren tersebut didirikan di ....",["Surabaya","Cirebon","Demak","Gresik"],3,"Sunan Giri mendirikan pesantren di Gresik, di atas bukit Giri."],
+["Sunan Giri dikenal juga dengan julukan “Raja Tanpa Mahkota”. Mengapa demikian?",["Menolak untuk menjadi raja meskipun diangkat oleh rakyat","Memiliki pengaruh besar di kalangan raja-raja Nusantara","Kekuatannya diakui tanpa gelar raja","Kekayaan yang melimpah"],1,"Sunan Giri dijuluki Raja Tanpa Mahkota karena pengaruhnya yang besar di kalangan raja-raja Nusantara."],
+["Bagaimana peran Sunan Giri dalam penyebaran Islam di luar Jawa?",["Menulis buku-buku agama yang tersebar ke seluruh Asia Tenggara","Mengirimkan murid-muridnya ke berbagai wilayah Nusantara","Menguasai wilayah perdagangan di Malaka","Mendirikan pusat dakwah di Sumatera"],1,"Sunan Giri mengirim murid-muridnya berdakwah ke berbagai wilayah Nusantara."]
+];
+var TOPICS = [
+  {name:"Wali Songo: tujuan dan cara dakwah", from:1, to:5},
+  {name:"Sunan Bonang", from:6, to:14},
+  {name:"Sunan Gresik", from:15, to:23},
+  {name:"Sunan Ampel", from:24, to:32},
+  {name:"Sunan Drajat", from:33, to:41},
+  {name:"Sunan Giri", from:42, to:50}
+];
+var N = QUESTIONS.length;
+var LETTERS = "abcd";
+
+function $(id){ return document.getElementById(id); }
+function h(tag, props){
+  var el = document.createElement(tag);
+  if(props){
+    for(var k in props){
+      var v = props[k];
+      if(k === "class") el.className = v;
+      else if(k === "text") el.textContent = v;
+      else if(k.slice(0,2) === "on") el.addEventListener(k.slice(2), v);
+      else if(v !== false && v != null) el.setAttribute(k, v === true ? "" : v);
+    }
+  }
+  for(var i = 2; i < arguments.length; i++){
+    var c = arguments[i];
+    if(c == null) continue;
+    el.append(c.nodeType ? c : document.createTextNode(String(c)));
+  }
+  return el;
+}
+function topicOf(i){
+  for(var t = 0; t < TOPICS.length; t++){ if(i + 1 >= TOPICS[t].from && i + 1 <= TOPICS[t].to) return TOPICS[t]; }
+  return TOPICS[0];
+}
+
+var state = {
+  phase:"start", tab:"kuis", name:"", kelas:"", idx:0,
+  answers:new Array(N).fill(-1), result:null, showAll:false,
+  isAdmin:false, isOwner:false, rows:[], loading:false, slow:false, dbErr:null
+};
+
+/* Draf di perangkat ini: hanya kenyamanan, halaman tetap jalan tanpa ini */
+var KEY = "kuis-wali-songo-draft";
+function readDraft(){
+  try{
+    var d = JSON.parse(localStorage.getItem(KEY) || "null");
+    if(d && Array.isArray(d.answers) && d.answers.length === N) return d;
+  }catch(e){}
+  return null;
+}
+function writeDraft(){
+  try{ localStorage.setItem(KEY, JSON.stringify({name:state.name, kelas:state.kelas, idx:state.idx, answers:state.answers})); }catch(e){}
+}
+function clearDraft(){ try{ localStorage.removeItem(KEY); }catch(e){} }
+
+var draft = readDraft();
+if(draft){
+  state.name = String(draft.name || "");
+  state.kelas = String(draft.kelas || "");
+  state.idx = Math.min(Math.max(draft.idx | 0, 0), N - 1);
+  state.answers = draft.answers.map(function(x){ return (Number.isInteger(x) && x >= 0 && x < 4) ? x : -1; });
+}
+function answeredCount(){ return state.answers.filter(function(a){ return a >= 0; }).length; }
+
+/* ---------- Tampilan ---------- */
+function render(){
+  var inKuis = state.tab === "kuis";
+  $("view-start").hidden = !(inKuis && state.phase === "start");
+  $("view-quiz").hidden = !(inKuis && state.phase === "quiz");
+  $("view-result").hidden = !(inKuis && state.phase === "result");
+  $("view-teacher").hidden = state.tab !== "hasil";
+  $("tab-kuis").setAttribute("aria-selected", inKuis ? "true" : "false");
+  $("tab-hasil").setAttribute("aria-selected", inKuis ? "false" : "true");
+  if(inKuis && state.phase === "start") renderStart();
+  if(inKuis && state.phase === "quiz") renderQuiz();
+  if(inKuis && state.phase === "result") renderResult();
+  if(!inKuis) renderTeacher();
+}
+
+function renderStart(){
+  $("nama").value = state.name;
+  $("kelas").value = state.kelas;
+  $("btn-start").textContent = answeredCount() > 0 ? "Lanjutkan kuis" : "Mulai kuis";
+  var ul = $("topics");
+  if(!ul.children.length){
+    TOPICS.forEach(function(t){
+      ul.append(h("li", null, h("span", {class:"rng", text:"Soal " + t.from + (t.to > t.from ? "–" + t.to : "")}), h("span", {text:t.name})));
+    });
+  }
+}
+
+function updateMeta(){
+  var a = answeredCount();
+  $("qnum").textContent = "Soal " + (state.idx + 1) + " dari " + N;
+  $("answered").textContent = a + " dari " + N + " terjawab";
+  $("bar").style.width = (a / N * 100) + "%";
+  var cells = $("grid").children;
+  for(var i = 0; i < cells.length; i++){
+    cells[i].className = "cell" + (state.answers[i] >= 0 ? " done" : "") + (i === state.idx ? " cur" : "");
+  }
+}
+
+function renderQuiz(){
+  var i = state.idx, q = QUESTIONS[i];
+  $("topic").textContent = topicOf(i).name;
+  $("stem").textContent = q[0];
+  var box = $("opts");
+  box.replaceChildren();
+  q[1].forEach(function(text, k){
+    var input = h("input", {type:"radio", name:"opt", value:String(k)});
+    input.checked = state.answers[i] === k;
+    input.addEventListener("change", function(){
+      state.answers[i] = k;
+      writeDraft();
+      $("confirm").hidden = true;
+      updateMeta();
+    });
+    box.append(h("label", {class:"opt"}, input, h("span", {class:"key", text:LETTERS[k].toUpperCase()}), h("span", {class:"txt", text:text})));
+  });
+  $("prev").disabled = i === 0;
+  $("next").textContent = i === N - 1 ? "Selesai" : "Lanjut";
+  var grid = $("grid");
+  if(grid.children.length !== N){
+    grid.replaceChildren();
+    for(var n = 0; n < N; n++){
+      (function(n){
+        grid.append(h("button", {type:"button", class:"cell", text:String(n + 1), "aria-label":"Soal " + (n + 1), onclick:function(){ go(n); }}));
+      })(n);
+    }
+  }
+  updateMeta();
+}
+
+function go(n){
+  state.idx = Math.min(Math.max(n, 0), N - 1);
+  $("confirm").hidden = true;
+  writeDraft();
+  renderQuiz();
+}
+
+function openConfirm(){
+  var left = N - answeredCount();
+  $("confirm-text").textContent = left > 0
+    ? "Masih ada " + left + " soal yang belum dijawab. Soal kosong dihitung salah. Kirim sekarang?"
+    : "Semua soal sudah dijawab. Kirim jawabanmu sekarang?";
+  $("recheck").textContent = left > 0 ? "Ke soal kosong pertama" : "Periksa lagi";
+  $("confirm").hidden = false;
+}
+
+function submitQuiz(){
+  var score = 0;
+  state.answers.forEach(function(a, i){ if(a === QUESTIONS[i][2]) score++; });
+  state.result = {score:score, answers:state.answers.slice()};
+  state.phase = "result";
+  state.showAll = false;
+  clearDraft();
+  $("confirm").hidden = true;
+  render();
+  window.scrollTo(0, 0);
+  saveResult(state.result);
+}
+
+function renderResult(){
+  var r = state.result;
+  if(!r) return;
+  $("r-who").textContent = state.name + (state.kelas ? " · " + state.kelas : "");
+  $("r-score").textContent = String(r.score);
+  $("r-of").textContent = "/ " + N + " benar";
+  $("r-nilai").textContent = String(Math.round(r.score / N * 100));
+
+  var tb = $("tbars");
+  tb.replaceChildren();
+  TOPICS.forEach(function(t){
+    var total = t.to - t.from + 1, ok = 0;
+    for(var i = t.from - 1; i < t.to; i++){ if(r.answers[i] === QUESTIONS[i][2]) ok++; }
+    tb.append(h("div", {class:"tb"},
+      h("div", {class:"lbl"}, h("span", {text:t.name}), h("span", {text:ok + " / " + total})),
+      h("div", {class:"track"}, h("div", {class:"fill", style:"width:" + (ok / total * 100) + "%"}))
+    ));
+  });
+
+  var list = $("review");
+  list.replaceChildren();
+  var shown = 0;
+  QUESTIONS.forEach(function(q, i){
+    var a = r.answers[i], ok = a === q[2];
+    if(!state.showAll && ok) return;
+    shown++;
+    var chipText = ok ? "Benar" : (a < 0 ? "Tidak dijawab" : "Salah");
+    var item = h("article", {class:"rv"},
+      h("div", {class:"rv-head"}, h("span", {class:"chip " + (ok ? "ok" : "no"), text:chipText}), h("span", {class:"note", text:"Soal " + (i + 1)})),
+      h("p", {class:"rv-q", text:q[0]})
+    );
+    if(!ok && a >= 0) item.append(h("p", {class:"rv-a"}, "Jawabanmu: ", h("strong", {text:LETTERS[a].toUpperCase() + ". " + q[1][a]})));
+    item.append(h("p", {class:"rv-a"}, "Jawaban benar: ", h("strong", {text:LETTERS[q[2]].toUpperCase() + ". " + q[1][q[2]]})));
+    item.append(h("p", {class:"note", text:q[3]}));
+    list.append(item);
+  });
+  if(!shown) list.append(h("p", {class:"note", text:"Semua jawabanmu benar. Tidak ada soal yang perlu dibahas."}));
+  $("rv-title").textContent = state.showAll ? "Pembahasan semua soal" : "Pembahasan soal yang salah";
+  $("rv-toggle").textContent = state.showAll ? "Hanya yang salah" : "Tampilkan semua";
+}
+
+/* ---------- Simpan hasil ke db ---------- */
+function setStatus(kind, text){
+  var el = $("save-status");
+  el.dataset.s = kind;
+  el.textContent = text;
+}
+async function saveResult(r){
+  setStatus("busy", "Mengirim nilai ke guru…");
+  try{
+    var c = window.claude;
+    if(!c || !c.use){ setStatus("local", "Nilai belum terkirim ke guru karena halaman ini dibuka di luar akun Claude. Skor di layar ini tetap berlaku."); return; }
+    var db = await c.use("db");
+    var user = await c.use("user");
+    var uid = user ? await user.id() : null;
+    if(!db || !uid){ setStatus("local", "Nilai belum terkirim ke guru. Masuk ke akun Claude lalu buka lagi tautan ini supaya hasilmu tercatat."); return; }
+    var ref = db.doc("results/" + uid);
+    var prev = null;
+    try{ var s = await ref.get(); if(s.exists) prev = s.data(); }catch(e){}
+    var best = Math.max(prev && typeof prev.bestScore === "number" ? prev.bestScore : 0, r.score);
+    await ref.set({
+      name:state.name, kelas:state.kelas, lastScore:r.score, bestScore:best,
+      attempts:((prev && prev.attempts) || 0) + 1, total:N,
+      answers:r.answers.map(function(a){ return a < 0 ? "" : LETTERS[a]; }),
+      updatedAt:new Date().toISOString()
+    });
+    setStatus("saved", "Nilai sudah terkirim ke guru.");
+  }catch(e){
+    if(e && e.code === "invalid_argument") setStatus("error", "Nilai belum tercatat karena aksesmu hanya untuk melihat. Minta guru memberi akses Kontributor, lalu ulangi kuis.");
+    else setStatus("error", "Nilai belum terkirim. Periksa koneksi, lalu ulangi kuis untuk mengirim lagi.");
+  }
+}
+
+/* ---------- Tampilan guru ---------- */
+function fmtTime(iso){
+  try{ return new Date(iso).toLocaleString("id-ID", {dateStyle:"medium", timeStyle:"short"}); }catch(e){ return ""; }
+}
+function nilai(score){ return Math.round((score || 0) / N * 100); }
+
+function renderTeacher(){
+  var box = $("teacher-body");
+  box.replaceChildren();
+  $("copy").hidden = true;
+  $("tsv").hidden = true;
+  if(state.dbErr){
+    box.append(h("p", {class:"note", text:"Daftar hasil belum bisa dimuat. Buka ulang halaman ini untuk mencoba lagi."}));
+    return;
+  }
+  if(state.loading){
+    box.append(h("p", {class:"note", text: state.slow ? "Data belum terjangkau, mungkin koneksi sedang lambat. Halaman tetap menunggu." : "Memuat hasil…"}));
+    return;
+  }
+  var rows = state.rows.slice().sort(function(a, b){
+    return ((b.bestScore || 0) - (a.bestScore || 0)) || String(a.name).localeCompare(String(b.name));
+  });
+  if(!rows.length){
+    box.append(h("p", {class:"note", text:"Belum ada hasil. Nilai muncul di sini setelah peserta menekan Kirim jawaban. Peserta perlu masuk ke akun Claude dan punya akses Kontributor."}));
+    return;
+  }
+  var bests = rows.map(function(r){ return r.bestScore || 0; });
+  var avg = bests.reduce(function(s, x){ return s + x; }, 0) / bests.length;
+  box.append(h("div", {class:"stats"},
+    h("div", {class:"stat"}, h("b", {text:String(rows.length)}), h("span", {text:"Peserta"})),
+    h("div", {class:"stat"}, h("b", {text:String(Math.round(avg / N * 100))}), h("span", {text:"Rata-rata nilai terbaik"})),
+    h("div", {class:"stat"}, h("b", {text:String(nilai(Math.max.apply(null, bests)))}), h("span", {text:"Tertinggi"})),
+    h("div", {class:"stat"}, h("b", {text:String(nilai(Math.min.apply(null, bests)))}), h("span", {text:"Terendah"}))
+  ));
+
+  var head = h("tr", null,
+    h("th", {text:"Nama"}), h("th", {text:"Kelas"}),
+    h("th", {class:"num", text:"Terakhir"}), h("th", {class:"num", text:"Terbaik"}),
+    h("th", {class:"num", text:"Percobaan"}), h("th", {text:"Waktu"}),
+    state.isOwner ? h("th", {text:""}) : null
+  );
+  var body = h("tbody");
+  rows.forEach(function(r){
+    body.append(h("tr", null,
+      h("td", {text:String(r.name || "Tanpa nama")}),
+      h("td", {text:String(r.kelas || "")}),
+      h("td", {class:"num", text:nilai(r.lastScore) + " (" + (r.lastScore || 0) + "/" + N + ")"}),
+      h("td", {class:"num", text:nilai(r.bestScore) + " (" + (r.bestScore || 0) + "/" + N + ")"}),
+      h("td", {class:"num", text:String(r.attempts || 1)}),
+      h("td", {text:fmtTime(r.updatedAt)}),
+      state.isOwner ? h("td", null, deleteButton(r.id)) : null
+    ));
+  });
+  box.append(h("div", {class:"tablewrap"}, h("table", null, h("thead", null, head), body)));
+
+  var withAns = rows.filter(function(r){ return Array.isArray(r.answers) && r.answers.length === N; });
+  if(withAns.length){
+    var pct = QUESTIONS.map(function(q, i){
+      var L = LETTERS[q[2]];
+      var c = withAns.filter(function(r){ return r.answers[i] === L; }).length;
+      return {i:i, p:c / withAns.length};
+    });
+    var hard = pct.slice().sort(function(a, b){ return (a.p - b.p) || (a.i - b.i); }).slice(0, 5);
+    var ul = h("ul", {class:"hard"});
+    hard.forEach(function(x){
+      ul.append(h("li", null,
+        h("span", {class:"pct", text:Math.round(x.p * 100) + "% benar"}),
+        h("div", null, h("strong", {text:"Soal " + (x.i + 1)}), h("div", {class:"sn", text:QUESTIONS[x.i][0]}))
+      ));
+    });
+    box.append(h("div", null,
+      h("h3", {style:"font-size:15px;margin-bottom:10px", text:"Soal yang paling sering salah"}),
+      ul,
+      h("p", {class:"note", style:"margin-top:10px", text:"Dihitung dari percobaan terakhir tiap peserta."})
+    ));
+  }
+  $("copy").hidden = false;
+  $("copy").onclick = function(){ copyTable(rows); };
+}
+
+function deleteButton(id){
+  var b = h("button", {type:"button", class:"btn small danger", text:"Hapus"});
+  var armed = false, timer = null;
+  b.addEventListener("click", async function(){
+    if(!armed){
+      armed = true; b.textContent = "Yakin hapus?";
+      timer = setTimeout(function(){ armed = false; b.textContent = "Hapus"; }, 4000);
+      return;
+    }
+    clearTimeout(timer);
+    b.disabled = true;
+    try{
+      var db = await window.claude.use("db");
+      await db.doc("results/" + id).delete();
+    }catch(e){ b.disabled = false; armed = false; b.textContent = "Gagal, coba lagi"; }
+  });
+  return b;
+}
+
+async function copyTable(rows){
+  function clean(s){ return String(s == null ? "" : s).replace(/[\t\r\n]+/g, " "); }
+  var lines = [["Nama","Kelas","Nilai terakhir","Nilai terbaik","Percobaan","Waktu"].join("\t")];
+  rows.forEach(function(r){
+    lines.push([clean(r.name), clean(r.kelas), nilai(r.lastScore), nilai(r.bestScore), r.attempts || 1, clean(fmtTime(r.updatedAt))].join("\t"));
+  });
+  var text = lines.join("\n");
+  try{
+    await navigator.clipboard.writeText(text);
+    $("copy-note").textContent = "Tabel disalin.";
+    $("tsv").hidden = true;
+  }catch(e){
+    var ta = $("tsv");
+    ta.hidden = false; ta.value = text; ta.focus(); ta.select();
+    $("copy-note").textContent = "Salin manual dari kotak di bawah.";
+  }
+}
+
+async function initAdmin(){
+  try{
+    var c = window.claude;
+    if(!c || !c.use) return;
+    var user = await c.use("user");
+    if(!user) return;
+    var flags = await Promise.all([user.canEdit(), user.isOwner()]);
+    if(!flags[0]) return;
+    state.isAdmin = true; state.isOwner = flags[1];
+    $("tabs").hidden = false;
+    var db = await c.use("db");
+    if(!db){ state.dbErr = "unavailable"; return; }
+    state.loading = true;
+    var timer = setTimeout(function(){ if(state.loading){ state.slow = true; renderTeacher(); } }, 10000);
+    db.collection("results").onSnapshot(function(snap){
+      clearTimeout(timer);
+      state.loading = false; state.slow = false; state.dbErr = null;
+      state.rows = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+      if(state.tab === "hasil") renderTeacher();
+    }, function(err){
+      clearTimeout(timer);
+      state.loading = false; state.dbErr = (err && err.code) || "error";
+      if(state.tab === "hasil") renderTeacher();
+    });
+  }catch(e){}
+}
+
+/* ---------- Peristiwa ---------- */
+$("form-start").addEventListener("submit", function(e){
+  e.preventDefault();
+  var nm = $("nama").value.trim();
+  if(!nm){ $("nama-err").hidden = false; $("nama").focus(); return; }
+  $("nama-err").hidden = true;
+  state.name = nm; state.kelas = $("kelas").value.trim();
+  state.phase = "quiz";
+  var firstEmpty = state.answers.indexOf(-1);
+  if(answeredCount() === 0) state.idx = 0;
+  else if(firstEmpty >= 0 && state.idx === 0) state.idx = firstEmpty;
+  writeDraft(); render(); window.scrollTo(0, 0);
+});
+$("prev").addEventListener("click", function(){ go(state.idx - 1); });
+$("next").addEventListener("click", function(){
+  if(state.idx === N - 1) openConfirm(); else go(state.idx + 1);
+});
+$("recheck").addEventListener("click", function(){
+  var firstEmpty = state.answers.indexOf(-1);
+  $("confirm").hidden = true;
+  if(firstEmpty >= 0) go(firstEmpty);
+});
+$("send").addEventListener("click", submitQuiz);
+$("rv-toggle").addEventListener("click", function(){ state.showAll = !state.showAll; renderResult(); });
+$("retake").addEventListener("click", function(){
+  state.answers = new Array(N).fill(-1); state.idx = 0; state.result = null; state.phase = "quiz";
+  writeDraft(); render(); window.scrollTo(0, 0);
+});
+$("other").addEventListener("click", function(){
+  state.answers = new Array(N).fill(-1); state.idx = 0; state.result = null; state.phase = "start";
+  state.name = ""; state.kelas = "";
+  clearDraft(); render(); window.scrollTo(0, 0);
+});
+$("tab-kuis").addEventListener("click", function(){ state.tab = "kuis"; render(); });
+$("tab-hasil").addEventListener("click", function(){ state.tab = "hasil"; render(); });
+
+render();
+initAdmin();
+})();
+</script>
+
+</body></html>
